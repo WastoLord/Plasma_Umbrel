@@ -1,17 +1,16 @@
-## Umbrel Community App Store Template
+## Template de App Store Comunitária do Umbrel
 
-This repository is a template to create an Umbrel Community App Store. These additional app stores allow developers to distribute applications without submitting to the [Official Umbrel App Store](https://github.com/getumbrel/umbrel-apps).
+Este repositório é um template para criar uma App Store Comunitária do Umbrel. Essas app stores adicionais permitem que desenvolvedores distribuam aplicações sem precisar enviá-las para a [App Store Oficial do Umbrel](https://github.com/getumbrel/umbrel-apps).
 
-## How to use:
+## Como usar:
 
-1. Start by clicking the "Use this template" button located above.
-2. Assign an ID and name to your app store within the `umbrel-app-store.yml` file. This file specifies two important attributes:
-    - `id` - Acts as a unique prefix for every app within your Community App Store. You must start your application's ID with your app store's ID. For instance, in this template, the app store ID is `sparkles`, and there's an app named `hello world`. Consequently, the app's ID should be: `sparkles-hello-world`.
-    - `name` - This is the name of the Community App Store displayed in the umbrelOS UI.
-3. Change the name of the `sparkles-hello-world` folder to match your app's ID. The app ID is for you to decide. For example, if your app store ID is `whistles`, and your app is named My Video Downloader, you could set its app ID to `whistles-my-video-downloader`, and rename the folder accordingly.
-4. Next, enter your app's listing details in the `whistles-my-video-downloader/umbrel-app.yml`. These are displayed in the umbrelOS UI.
-5. Include the necessary Docker services in `whistles-my-video-downloader/docker-compose.yml`.
-6. That's it! Your Community App Store, featuring your unique app, is now set up and ready to go. To use your Community App Store, you can add its GitHub url the umbrelOS user interface as shown in the following demo:
-
+1. Comece clicando no botão **"Use this template"** localizado acima.
+2. Defina um ID e um nome para sua app store no arquivo `umbrel-app-store.yml`. Esse arquivo especifica dois atributos importantes:
+    - `id` – Atua como um prefixo único para todos os apps da sua App Store Comunitária. Você deve iniciar o ID de cada aplicativo com o ID da sua app store. Por exemplo, neste template, o ID da app store é `sparkles` e existe um app chamado `hello world`. Portanto, o ID do app deve ser: `sparkles-hello-world`.
+    - `name` – Este é o nome da App Store Comunitária exibido na interface do umbrelOS.
+3. Altere o nome da pasta `sparkles-hello-world` para corresponder ao ID do seu aplicativo. O ID do app fica a seu critério. Por exemplo, se o ID da sua app store for `whistles` e seu app se chamar *My Video Downloader*, você pode definir o ID do app como `whistles-my-video-downloader` e renomear a pasta de acordo.
+4. Em seguida, preencha os detalhes de listagem do seu app no arquivo `whistles-my-video-downloader/umbrel-app.yml`. Essas informações são exibidas na interface do umbrelOS.
+5. Inclua os serviços Docker necessários no arquivo `whistles-my-video-downloader/docker-compose.yml`.
+6. Pronto! Sua App Store Comunitária, com seu aplicativo exclusivo, agora está configurada e pronta para uso. Para utilizá-la, você pode adicionar a URL do GitHub da sua App Store Comunitária na interface do umbrelOS, conforme mostrado na demonstração a seguir:
 
 https://user-images.githubusercontent.com/10330103/197889452-e5cd7e96-3233-4a09-b475-94b754adc7a3.mp4
