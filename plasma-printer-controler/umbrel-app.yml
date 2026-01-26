@@ -1,23 +1,23 @@
 manifestVersion: 1
-id: sparkles-hello-world
-name: Hello World
+id: plasma-printer-controler
+name: Printer Controler
 tagline: Replace this tagline with your app's tagline
 icon: https://svgur.com/i/mvA.svg
 category: Development
-version: "1.0.0"
-port: 4000
+version: "0.0.1"
+port: 9101
 description: >-
   Add your app's description here.
 
 
   You can also add newlines!
 
-developer: Umbrel
-website: https://umbrel.com
-submitter: Umbrel
-submission: https://github.com/getumbrel/umbrel-hello-world-app
-repo: https://github.com/getumbrel/umbrel-hello-world-app
-support: https://github.com/getumbrel/umbrel-hello-world-app/issues
+developer: WastoLord
+website: https://github.com/WastoLord/Plasma_Umbrel
+submitter: WastoLord
+submission: https://github.com/WastoLord/Plasma_Umbrel
+repo: https://github.com/WastoLord/Plasma_Umbrel
+support: https://github.com/WastoLord/Plasma_Umbrel/issues
 gallery:
   - https://i.imgur.com/yyVG0Jb.jpeg
   - https://i.imgur.com/yyVG0Jb.jpeg
