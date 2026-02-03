@@ -1,46 +1,42 @@
 #!/bin/bash
-
-# 'set -e' faz o script parar imediatamente se qualquer comando der erro.
-# Isso evita que o Docker diga que "deu certo" se o download falhar.
 set -e
 
 echo "=== [BUILD] INICIANDO INSTALAÇÃO DO PLUGIN HP ==="
 
-# 1. DETECTAR A VERSÃO DO HPLIP INSTALADA
-# O comando dpkg lista o pacote, awk pega a coluna da versão, cut remove o "+dfsg" do Debian
-HP_VERSION=$(dpkg -l hplip | grep ii | awk '{print $3}' | cut -d+ -f1)
+# 1. DETECTAR A VERSÃO
+VERSION=$(dpkg -l hplip | grep ii | awk '{print $3}' | cut -d+ -f1)
 
-if [ -z "$HP_VERSION" ]; then
-    echo "ERRO: HPLIP não parece estar instalado."
+if [ -z "$VERSION" ]; then
+    echo "ERRO: HPLIP não encontrado."
     exit 1
 fi
 
-echo "--> Versão detectada: $HP_VERSION"
+ARQUIVO_RUN="hplip-${VERSION}-plugin.run"
+URL_BASE="https://www.openprinting.org/download/printdriver/auxfiles/HP/plugins"
+CAMINHO_FINAL="/tmp/$ARQUIVO_RUN"
 
-# 2. BAIXAR O ARQUIVO .RUN (PLUGIN)
-# O site openprinting é o repositório oficial que o hp-plugin usa internamente
-URL="https://www.openprinting.org/download/printdriver/auxfiles/HP/plugins/hplip-${HP_VERSION}-plugin.run"
-DEST="/tmp/hplip-plugin.run"
+echo "--> Versão: $VERSION"
+echo "--> Baixando: $ARQUIVO_RUN"
 
-echo "--> Baixando plugin de: $URL"
-wget -O "$DEST" "$URL"
+# 2. DOWNLOAD
+wget -O "$CAMINHO_FINAL" "$URL_BASE/$ARQUIVO_RUN"
 
-if [ ! -f "$DEST" ]; then
-    echo "ERRO: Falha ao baixar o arquivo."
+if [ ! -f "$CAMINHO_FINAL" ]; then
+    echo "ERRO: Download falhou."
     exit 1
 fi
 
-# 3. INSTALAÇÃO SILENCIOSA
-# O segredo aqui é o '-- -q'. 
-# O primeiro '--' passa argumentos para o instalador interno.
-# O '-q' (quit/quiet) aceita a licença automaticamente e instala sem interface gráfica.
-echo "--> Executando instalador silencioso..."
-chmod +x "$DEST"
-sh "$DEST" -- -q
+# 3. INSTALAÇÃO FORÇADA (O PULO DO GATO 🐈)
+echo "--> Executando instalador..."
+chmod +x "$CAMINHO_FINAL"
+
+# MUDANÇA AQUI:
+# 'yes' envia 'y' repetidamente para aceitar a licença
+# '-i' força modo texto (console) em vez de gráfico
+yes | sh "$CAMINHO_FINAL" -- -i
 
 # 4. LIMPEZA
-# Remove o instalador para a imagem Docker ficar menor
-echo "--> Limpando arquivos temporários..."
-rm "$DEST"
+echo "--> Limpando..."
+rm "$CAMINHO_FINAL"
 
-echo "=== [BUILD] PLUGIN INSTALADO COM SUCESSO! ==="
+echo "=== [BUILD] SUCESSO! ==="
