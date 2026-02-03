@@ -2,16 +2,17 @@ FROM debian:bookworm-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Define a pasta padrão dentro do container
+WORKDIR /app
+
 # 1. Copia os scripts para dentro da imagem PRIMEIRO
-# (Eles precisam estar na mesma pasta do Dockerfile no Codespace)
-COPY instalacao.sh /usr/local/bin/instalacao.sh
-COPY iniciar.sh /usr/local/bin/iniciar.sh
+COPY app/ .
 
-# 2. Torna eles executáveis
-RUN chmod +x /usr/local/bin/instalacao.sh /usr/local/bin/iniciar.sh
+# 2. Dá permissão de execução para eles
+RUN chmod +x /app/instalacao.sh /app/iniciar.sh
 
-# 3. Instala pacotes E roda seu script de instalação
-# Adicionei 'printer-driver-hpcups' e 'dbus' na lista pois são obrigatórios pro hardware funcionar
+# 3. Instala dependências, RODA O SCRIPT DE INSTALAÇÃO e limpa o lixo
+# O ./instalacao.sh é executado aqui para o plugin ficar gravado na imagem
 RUN apt-get update && apt-get install -y \
     cups \
     cups-client \
@@ -22,8 +23,8 @@ RUN apt-get update && apt-get install -y \
     usbutils \
     python3 \
     dbus \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* \
-    && /usr/local/bin/instalacao.sh
+    && ./instalacao.sh \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# 4. Define o comando de arranque
-CMD ["/usr/local/bin/iniciar.sh"]
+# 4. Define o comando que roda quando o container liga
+CMD ["/app/iniciar.sh"]
