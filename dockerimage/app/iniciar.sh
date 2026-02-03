@@ -9,25 +9,27 @@ echo "=========================================="
 ulimit -n 2048
 echo "✅ [1/5] Limite de arquivos ajustado (ulimit)"
 
-# ... (início do script) ...
-
-echo "✅ [2/5] D-Bus iniciado"
-
-# --- NOVO BLOCO: CONFIGURAÇÃO DE ACESSO EXTERNO ---
 echo "🔓 Liberando acesso externo ao CUPS..."
 if [ ! -f /etc/cups/cupsd.conf ]; then
     cp /usr/share/cups/cupsd.conf.default /etc/cups/cupsd.conf
 fi
 
-# Troca "Listen localhost:631" por "Port 631" para ouvir em todas as interfaces
+# 1. Ouve na porta de rede
 sed -i 's/Listen localhost:631/Port 631/' /etc/cups/cupsd.conf
 
-# Garante que as permissões de acesso permitam conexões de qualquer IP (Docker Network)
-# Isso insere "Allow all" nas seções críticas
+# 2. Permite qualquer IP (Allow all)
 sed -i '/<Location \/>/a \  Allow all' /etc/cups/cupsd.conf
 sed -i '/<Location \/admin>/a \  Allow all' /etc/cups/cupsd.conf
 sed -i '/<Location \/admin\/conf>/a \  Allow all' /etc/cups/cupsd.conf
-# ----------------------------------------------------
+
+# --- NOVAS CORREÇÕES AQUI ---
+# 3. Permite qualquer Hostname (umbrel, casa.local, ip, etc)
+grep -q "ServerAlias *" /etc/cups/cupsd.conf || echo "ServerAlias *" >> /etc/cups/cupsd.conf
+
+# 4. Desativa SSL para evitar erro de credencial
+grep -q "DefaultEncryption Never" /etc/cups/cupsd.conf || echo "DefaultEncryption Never" >> /etc/cups/cupsd.conf
+# -----------------------------
+
 
 # 2. INICIAR O D-BUS
 mkdir -p /var/run/dbus
