@@ -3,41 +3,30 @@ version: "3.7"
 services:
   app_proxy:
     environment:
-      # O padrão de nome do container é: <app-id>_<service-name>_1
-      APP_HOST: plasma-printer-controler_server_1
-      # A porta INTERNA que o CUPS usa (Interface Web)
+      # CORREÇÃO: Usamos apenas o nome do serviço abaixo ('server')
+      # O Docker resolve isso automaticamente na rede interna.
+      APP_HOST: server
       APP_PORT: 631
-      # Acesso público (opcional, mas recomendado para apps de rede)
       PROXY_AUTH_ADD: "false"
 
   server:
-    # Corrigido o erro de digitação 'image: image:'
     image: wastolord/plasma-m1132:v1
+    # REMOVIDO: container_name (Deixe o Umbrel gerenciar os nomes)
     
-    # O Umbrel gerencia o restart
     restart: on-failure
     stop_grace_period: 1m
     
-    # CRÍTICO: Necessário para acessar o USB do Host
+    # Obrigatório para USB
     privileged: true
     
-    # --- VOLUMES (A Mágica do Umbrel) ---
     volumes:
-      # 1. Hardware: Mapeia o barramento USB inteiro
       - /dev/bus/usb:/dev/bus/usb
-      
-      # 2. Persistência: Salva configs na pasta do usuário do Umbrel
-      # Se você não mapear isso, perde a impressora ao reiniciar
       - ${APP_DATA_DIR}/data/cups:/etc/cups
       - ${APP_DATA_DIR}/data/log:/var/log/cups
 
-    # --- REDE ---
-    # Expõe a porta 631 para a rede local (LAN)
-    # Isso permite que o Windows/Android achem a impressora pelo IP do Umbrel
     ports:
       - "631:631"
 
-    # --- PROTEÇÃO DO ATOM ---
     deploy:
       resources:
         limits:
