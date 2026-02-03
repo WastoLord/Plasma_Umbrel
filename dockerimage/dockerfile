@@ -1,0 +1,29 @@
+FROM debian:bookworm-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 1. Copia os scripts para dentro da imagem PRIMEIRO
+# (Eles precisam estar na mesma pasta do Dockerfile no Codespace)
+COPY instalacao.sh /usr/local/bin/instalacao.sh
+COPY iniciar.sh /usr/local/bin/iniciar.sh
+
+# 2. Torna eles executáveis
+RUN chmod +x /usr/local/bin/instalacao.sh /usr/local/bin/iniciar.sh
+
+# 3. Instala pacotes E roda seu script de instalação
+# Adicionei 'printer-driver-hpcups' e 'dbus' na lista pois são obrigatórios pro hardware funcionar
+RUN apt-get update && apt-get install -y \
+    cups \
+    cups-client \
+    sane-utils \
+    hplip \
+    printer-driver-hpcups \
+    wget \
+    usbutils \
+    python3 \
+    dbus \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* \
+    && /usr/local/bin/instalacao.sh
+
+# 4. Define o comando de arranque
+CMD ["/usr/local/bin/iniciar.sh"]
