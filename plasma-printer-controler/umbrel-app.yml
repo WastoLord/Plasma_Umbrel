@@ -1,29 +1,36 @@
 manifestVersion: 1
 id: plasma-printer-controler
-name: Printer Controler
-tagline: Replace this tagline with your app's tagline
+name: HP Printer Controller
+tagline: Driver e gerenciador para HP M1132 MFP
 icon: https://svgur.com/i/mvA.svg
-category: Development
-version: "0.0.1"
+category: Home Automation
+version: "1.0.0"
+# Porta onde o usuário vai clicar em "Abrir" no Umbrel
 port: 9101
 description: >-
-  Add your app's description here.
+  Driver completo e servidor CUPS para a impressora HP LaserJet Professional M1132 MFP.
+  
+  Inclui o plugin proprietário da HP pré-instalado e configuração automática via USB.
+  
+  Funcionalidades:
+  - Plug & Play: Conecte o USB e a impressora será registrada.
+  - Interface CUPS completa para gerenciamento.
+  - Suporte a AirPrint e impressão via rede (Windows/Linux/Android).
+  
+  ⚠️ Requer que a impressora esteja conectada na porta USB do Umbrel.
 
-
-  You can also add newlines!
-
-developer: WastoLord
+developer: Plasma Community
 website: https://github.com/WastoLord/Plasma_Umbrel
 submitter: WastoLord
 submission: https://github.com/WastoLord/Plasma_Umbrel
 repo: https://github.com/WastoLord/Plasma_Umbrel
 support: https://github.com/WastoLord/Plasma_Umbrel/issues
 gallery:
-  - https://i.imgur.com/yyVG0Jb.jpeg
-  - https://i.imgur.com/yyVG0Jb.jpeg
-  - https://i.imgur.com/yyVG0Jb.jpeg
+  - https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Cups-logo.svg/1200px-Cups-logo.svg.png
 releaseNotes: >-
-  Add what's new in the latest version of your app here.
+  - Versão inicial com plugin HPLIP 3.22.10
+  - Suporte automático a USB
+  - Limite de recursos para proteção do sistema
 dependencies: []
 path: ""
 defaultUsername: ""
