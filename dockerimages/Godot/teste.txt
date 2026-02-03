@@ -1,0 +1,1 @@
+wget https://github.com/godotengine/godot/releases/download/4.6-stable/Godot_v4.6-stable_web_editor.zip
