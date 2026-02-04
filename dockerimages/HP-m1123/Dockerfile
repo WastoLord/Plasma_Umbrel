@@ -33,3 +33,6 @@ RUN ./instalacao.sh
 
 # 5. Comando final
 CMD ["/app/iniciar.sh"]
+#comando pra dar pull
+# $ docker build -t wastolord/plasma-m1132:v2 .
+# $ docker push wastolord/plasma-m1132:v2
