@@ -28,14 +28,20 @@ app.use(express.json());
 app.get('/files', (req, res) => {
     fs.readdir(SCAN_DIR, (err, files) => {
         if (err) return res.status(500).json({ error: 'Erro ao ler pasta' });
-        // Filtra para não mostrar arquivos ocultos e ordena por data (mais recente primeiro)
+        
         const fileList = files
-            .filter(f => !f.startsWith('.'))
+            .filter(f => !f.startsWith('.')) // Ignora arquivos ocultos
             .map(f => {
-                const stats = fs.statSync(path.join(SCAN_DIR, f));
-                return { name: f, time: stats.mtime, size: stats.size };
+                try {
+                    const stats = fs.statSync(path.join(SCAN_DIR, f));
+                    return { name: f, time: stats.mtime, size: stats.size };
+                } catch (e) {
+                    return null;
+                }
             })
+            .filter(f => f !== null)
             .sort((a, b) => b.time - a.time);
+            
         res.json(fileList);
     });
 });
@@ -46,14 +52,15 @@ app.get('/download/:filename', (req, res) => {
     res.download(file);
 });
 
-// --- ROTA 3: EXECUTAR SCAN (hp-scan) ---
+// --- ROTA 3: EXECUTAR SCAN (CORRIGIDA) ---
 app.post('/scan', (req, res) => {
     const { filename, mode, resolution, format } = req.body;
     
-    // Tratamento do nome do arquivo (se vazio, gera data)
+    // Tratamento do nome do arquivo
     let finalName = filename.trim();
     if (!finalName) {
         const now = new Date();
+        // Formato: scan_2026-02-04_10-30-00
         finalName = `scan_${now.toISOString().replace(/[:.]/g, '-')}`;
     }
     // Garante a extensão correta
@@ -63,20 +70,31 @@ app.post('/scan', (req, res) => {
 
     const outputFile = path.join(SCAN_DIR, finalName);
     
-    // Constrói o comando hp-scan
-    // -m: mode (color, gray) | -r: resolution (dpi) | -o: output
-    const cmd = `hp-scan --mode=${mode} --res=${resolution} --dest="${outputFile}"`;
+    // COMANDO CORRIGIDO: --dest=file e --file="caminho"
+    const cmd = `hp-scan --mode=${mode} --res=${resolution} --dest=file --file="${outputFile}"`;
 
     console.log(`Iniciando Scan: ${cmd}`);
 
     exec(cmd, (error, stdout, stderr) => {
         if (error) {
-            console.error(`Erro Scan: ${error.message}`);
-            return res.status(500).json({ success: false, error: stderr || error.message });
+            console.error(`Erro Scan (Processo): ${stderr || error.message}`);
+            // Não retorna erro imediatamente, pois o hp-scan as vezes retorna exit code 1 mesmo funcionando
         }
-        // Ajusta permissões para que o Umbrel consiga editar/apagar o arquivo
-        fs.chmodSync(outputFile, 0o777); 
-        res.json({ success: true, message: 'Digitalização concluída!', file: finalName });
+
+        // VERIFICAÇÃO DE SEGURANÇA: Só tenta dar permissão se o arquivo realmente existir
+        if (fs.existsSync(outputFile)) {
+            try {
+                fs.chmodSync(outputFile, 0o777); // Permissão total para o Umbrel conseguir deletar/mover
+                res.json({ success: true, message: 'Digitalização concluída!', file: finalName });
+            } catch (permErr) {
+                console.error("Erro de permissão:", permErr);
+                res.json({ success: true, message: 'Scan salvo (aviso de permissão)', file: finalName });
+            }
+        } else {
+            console.error("Arquivo não encontrado após scan:", outputFile);
+            console.error("Saída do comando:", stdout);
+            res.status(500).json({ success: false, error: "Scanner finalizou mas o arquivo não foi criado. Verifique o log." });
+        }
     });
 });
 
@@ -88,10 +106,6 @@ app.post('/print', upload.single('file'), (req, res) => {
     const filePath = req.file.path;
 
     // Constrói comando lp
-    // -d M1132: define impressora
-    // -n: número de cópias
-    // -o landscape/portrait
-    // -o fit-to-page: ajusta ao papel
     let options = `-n ${copies} -o fit-to-page`;
     if (orientation === 'landscape') options += ' -o landscape';
 
@@ -100,8 +114,8 @@ app.post('/print', upload.single('file'), (req, res) => {
     console.log(`Imprimindo: ${cmd}`);
 
     exec(cmd, (error, stdout, stderr) => {
-        // Remove o arquivo temporário após enviar para o CUPS
-        fs.unlink(filePath, () => {}); 
+        // Tenta remover o arquivo temporário
+        try { fs.unlinkSync(filePath); } catch(e) {}
 
         if (error) {
             console.error(`Erro Print: ${stderr}`);
