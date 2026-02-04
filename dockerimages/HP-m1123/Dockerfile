@@ -30,6 +30,8 @@ RUN apt-get update && apt-get install -y \
     git \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+RUN cd /app/interface && npm install
+
 # 4. BLOCO B: Roda o script de instalação do plugin SEPARADO
 # Se der erro aqui, saberemos que foi culpa do script/download
 RUN ./instalacao.sh
