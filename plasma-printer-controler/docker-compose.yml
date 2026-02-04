@@ -10,7 +10,7 @@ services:
       PROXY_AUTH_ADD: "false"
 
   server:
-    image: wastolord/plasma-m1132:v1
+    image: wastolord/plasma-m1132:v2
     # REMOVIDO: container_name (Deixe o Umbrel gerenciar os nomes)
     
     restart: on-failure
