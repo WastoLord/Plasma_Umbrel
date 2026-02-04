@@ -9,26 +9,50 @@ echo "=========================================="
 ulimit -n 2048
 echo "✅ [1/5] Limite de arquivos ajustado (ulimit)"
 
-echo "🔓 Liberando acesso externo ao CUPS..."
+# ====================================================
+# CONFIGURAÇÃO AUTOMÁTICA DO CUPS E SSL
+# ====================================================
+echo "🔓 [SETUP] Configurando permissões e segurança do CUPS..."
+
+# 1. Garante que o arquivo de configuração existe
 if [ ! -f /etc/cups/cupsd.conf ]; then
     cp /usr/share/cups/cupsd.conf.default /etc/cups/cupsd.conf
 fi
 
-# 1. Ouve na porta de rede
+# 2. Abre a porta 631 para a rede (em vez de ouvir só localhost)
 sed -i 's/Listen localhost:631/Port 631/' /etc/cups/cupsd.conf
 
-# 2. Permite qualquer IP (Allow all)
+# 3. Libera acesso para qualquer IP (Necessário para Docker/Tailscale)
+# Remove restrições antigas se existirem para evitar duplicação
+sed -i '/Allow all/d' /etc/cups/cupsd.conf
 sed -i '/<Location \/>/a \  Allow all' /etc/cups/cupsd.conf
 sed -i '/<Location \/admin>/a \  Allow all' /etc/cups/cupsd.conf
 sed -i '/<Location \/admin\/conf>/a \  Allow all' /etc/cups/cupsd.conf
 
-# --- NOVAS CORREÇÕES AQUI ---
-# 3. Permite qualquer Hostname (umbrel, casa.local, ip, etc)
+# 4. Permite qualquer Hostname (Resolve o erro "Invalid Host" no Tailscale)
 grep -q "ServerAlias *" /etc/cups/cupsd.conf || echo "ServerAlias *" >> /etc/cups/cupsd.conf
 
-# 4. Desativa SSL para evitar erro de credencial
-grep -q "DefaultEncryption Never" /etc/cups/cupsd.conf || echo "DefaultEncryption Never" >> /etc/cups/cupsd.conf
-# -----------------------------
+# 5. Define politica de Criptografia (Aceita se o Android pedir)
+# Remove linhas antigas para evitar conflito e adiciona a correta
+sed -i '/DefaultEncryption/d' /etc/cups/cupsd.conf
+echo "DefaultEncryption IfRequested" >> /etc/cups/cupsd.conf
+
+# 6. GERAÇÃO AUTOMÁTICA DE CERTIFICADOS SSL (Resolve o erro "Unable to create credentials")
+if [ ! -f /etc/cups/ssl/server.crt ]; then
+    echo "🔑 [SSL] Gerando certificados autoassinados..."
+    mkdir -p /etc/cups/ssl
+    openssl req -new -x509 -keyout /etc/cups/ssl/server.key -out /etc/cups/ssl/server.crt -days 3650 -nodes -subj '/C=BR/ST=SP/L=Umbrel/O=Plasma/CN=umbrel'
+else
+    echo "🔑 [SSL] Certificados já existem."
+fi
+
+# 7. CORREÇÃO DE PERMISSÕES (Crucial para o CUPS ler as chaves)
+echo "🛡️ [PERM] Ajustando dono e permissões da pasta SSL..."
+chgrp -R lp /etc/cups/ssl
+chmod 750 /etc/cups/ssl
+chmod 640 /etc/cups/ssl/*
+
+# ====================================================
 
 
 # 2. INICIAR O D-BUS

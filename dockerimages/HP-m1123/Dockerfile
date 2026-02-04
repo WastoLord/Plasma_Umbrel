@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
     cups-client \
     sane-utils \
     hplip \
+    openssl \
     printer-driver-hpcups \
     wget \
     usbutils \
