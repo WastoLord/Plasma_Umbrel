@@ -6,7 +6,7 @@ WORKDIR /app
 
 # 1. Copia a pasta 'app' do Codespace para dentro da imagem
 COPY app/ .
-
+COPY interface/ ./interface/
 # 2. Permissões
 RUN chmod +x /app/instalacao.sh /app/iniciar.sh
 
