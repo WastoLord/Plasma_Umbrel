@@ -1,0 +1,14 @@
+{
+  "name": "plasma-printer-ui",
+  "version": "2.0.0",
+  "description": "Interface web para HP M1132 (Scan e Print)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "cors": "^2.8.5"
+  }
+}

@@ -25,6 +25,9 @@ RUN apt-get update && apt-get install -y \
     dbus \
     gnupg \
     file \
+    nodejs \
+    npm \
+    git \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 4. BLOCO B: Roda o script de instalação do plugin SEPARADO

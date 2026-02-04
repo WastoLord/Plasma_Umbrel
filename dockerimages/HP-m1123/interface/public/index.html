@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HP M1132 Controller</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f4f9; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #444; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .card-header h2 { margin: 0; font-size: 1.2rem; }
+        
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        
+        input[type="text"], select, input[type="file"] { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        
+        .config-details { margin-top: 10px; background: #f9f9f9; padding: 10px; border-radius: 6px; }
+        summary { cursor: pointer; font-weight: bold; color: #666; margin-bottom: 10px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
+        .status { margin-top: 10px; padding: 10px; border-radius: 4px; display: none; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 10px; display: none;}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <h1>🖨️ HP M1132 Controller</h1>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>Impressão</h2>
+        </div>
+        <input type="file" id="printFile">
+        
+        <details class="config-details">
+            <summary>⚙️ Configurações de Impressão</summary>
+            <label>Cópias:</label>
+            <input type="number" id="copies" value="1" min="1" max="50">
+            <label>Orientação:</label>
+            <select id="orientation">
+                <option value="portrait">Retrato (Vertical)</option>
+                <option value="landscape">Paisagem (Horizontal)</option>
+            </select>
+        </details>
+
+        <br>
+        <button onclick="imprimir()" id="btnImprimir">🖨️ Imprimir Arquivo</button>
+        <div id="statusPrint" class="status"></div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>Scanner</h2>
+        </div>
+        
+        <label>Nome do Arquivo (Opcional):</label>
+        <input type="text" id="scanName" placeholder="Ex: Contrato_Aluguel (Data automática se vazio)">
+
+        <details class="config-details">
+            <summary>⚙️ Configurações de Digitalização</summary>
+            <label>Modo de Cor:</label>
+            <select id="scanMode">
+                <option value="color">Colorido</option>
+                <option value="gray">Cinza</option>
+                <option value="lineart">Preto e Branco (Rápido)</option>
+            </select>
+            
+            <label>Resolução (DPI):</label>
+            <select id="scanDpi">
+                <option value="75">75 DPI (Rascunho)</option>
+                <option value="150" selected>150 DPI (Padrão)</option>
+                <option value="300">300 DPI (Alta)</option>
+            </select>
+
+            <label>Formato:</label>
+            <select id="scanFormat">
+                <option value="pdf">PDF</option>
+                <option value="jpg">JPG</option>
+                <option value="png">PNG</option>
+            </select>
+        </details>
+
+        <br>
+        <button onclick="escanear()" id="btnScan">
+            <div class="loader" id="scanLoader"></div> 📸 Digitalizar
+        </button>
+        <div id="statusScan" class="status"></div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>📂 Arquivos Digitalizados</h2>
+            <button onclick="carregarArquivos()" style="padding: 5px 10px; font-size: 0.8rem;">Atualizar</button>
+        </div>
+        <table id="fileTable">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Tamanho</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </div>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="http://umbrel.local:631" target="_blank" style="color: #666; text-decoration: none;">Acessar Painel CUPS Avançado</a>
+    </div>
+
+    <script>
+        // IMPRESSÃO
+        async function imprimir() {
+            const fileInput = document.getElementById('printFile');
+            if (fileInput.files.length === 0) return alert('Selecione um arquivo!');
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('copies', document.getElementById('copies').value);
+            formData.append('orientation', document.getElementById('orientation').value);
+
+            const btn = document.getElementById('btnImprimir');
+            const status = document.getElementById('statusPrint');
+            
+            btn.disabled = true;
+            btn.innerText = "Enviando...";
+            status.style.display = 'none';
+
+            try {
+                const res = await fetch('/print', { method: 'POST', body: formData });
+                const data = await res.json();
+                status.innerText = data.success ? data.message : "Erro: " + data.error;
+                status.className = data.success ? "status success" : "status error";
+                status.style.display = 'block';
+            } catch (e) {
+                alert("Erro de conexão");
+            }
+            btn.disabled = false;
+            btn.innerText = "🖨️ Imprimir Arquivo";
+        }
+
+        // SCANNER
+        async function escanear() {
+            const btn = document.getElementById('btnScan');
+            const loader = document.getElementById('scanLoader');
+            const status = document.getElementById('statusScan');
+
+            const payload = {
+                filename: document.getElementById('scanName').value,
+                mode: document.getElementById('scanMode').value,
+                resolution: document.getElementById('scanDpi').value,
+                format: document.getElementById('scanFormat').value
+            };
+
+            btn.disabled = true;
+            loader.style.display = 'inline-block';
+            status.style.display = 'none';
+
+            try {
+                const res = await fetch('/scan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    status.innerText = "Sucesso! Arquivo salvo.";
+                    status.className = "status success";
+                    carregarArquivos(); // Atualiza a lista
+                } else {
+                    status.innerText = "Erro no Scanner: " + data.error;
+                    status.className = "status error";
+                }
+                status.style.display = 'block';
+            } catch (e) {
+                status.innerText = "Erro de conexão com o servidor.";
+                status.className = "status error";
+                status.style.display = 'block';
+            }
+
+            btn.disabled = false;
+            loader.style.display = 'none';
+        }
+
+        // LISTAR ARQUIVOS
+        async function carregarArquivos() {
+            const tbody = document.querySelector('#fileTable tbody');
+            tbody.innerHTML = '<tr><td colspan="3">Carregando...</td></tr>';
+            
+            try {
+                const res = await fetch('/files');
+                const files = await res.json();
+                tbody.innerHTML = '';
+
+                files.forEach(f => {
+                    const size = (f.size / 1024).toFixed(1) + ' KB';
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${f.name}</td>
+                            <td>${size}</td>
+                            <td>
+                                <a href="/download/${f.name}" target="_blank">⬇️ Baixar</a>
+                            </td>
+                        </tr>
+                    `;
+                });
+                if(files.length === 0) tbody.innerHTML = '<tr><td colspan="3">Nenhum arquivo encontrado.</td></tr>';
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="3">Erro ao carregar lista.</td></tr>';
+            }
+        }
+
+        // Carrega lista ao abrir
+        carregarArquivos();
+    </script>
+</body>
+</html>
