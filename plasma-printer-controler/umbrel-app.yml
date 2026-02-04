@@ -4,7 +4,7 @@ name: HP Printer Controller
 tagline: Driver e gerenciador para HP M1132 MFP
 icon: https://www.svgrepo.com/download/136853/black-printer.svg
 category: Home Automation
-version: "1.0.0"
+version: "1.0.1"
 # Porta onde o usuário vai clicar em "Abrir" no Umbrel
 port: 9101
 description: >-
