@@ -1,0 +1,37 @@
+manifestVersion: 1
+id: plasma-printer-controler
+name: HP Printer Controller
+tagline: Driver e gerenciador para HP M1132 MFP
+icon: https://www.svgrepo.com/download/136853/black-printer.svg
+category: Home Automation
+version: "1.0.3"
+# Porta onde o usuário vai clicar em "Abrir" no Umbrel
+port: 9101
+description: >-
+  Driver completo e servidor CUPS para a impressora HP LaserJet Professional M1132 MFP.
+  
+  Inclui o plugin proprietário da HP pré-instalado e configuração automática via USB.
+  
+  Funcionalidades:
+  - Plug & Play: Conecte o USB e a impressora será registrada.
+  - Interface CUPS completa para gerenciamento.
+  - Suporte a AirPrint e impressão via rede (Windows/Linux/Android).
+  
+  ⚠️ Requer que a impressora esteja conectada na porta USB do Umbrel.
+
+developer: Plasma Community
+website: https://github.com/WastoLord/Plasma_Umbrel
+submitter: WastoLord
+submission: https://github.com/WastoLord/Plasma_Umbrel
+repo: https://github.com/WastoLord/Plasma_Umbrel
+support: https://github.com/WastoLord/Plasma_Umbrel/issues
+gallery:
+  - https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Cups-logo.svg/1200px-Cups-logo.svg.png
+releaseNotes: >-
+  - Versão inicial com plugin HPLIP 3.22.10
+  - Suporte automático a USB
+  - Limite de recursos para proteção do sistema
+dependencies: []
+path: ""
+defaultUsername: ""
+defaultPassword: ""

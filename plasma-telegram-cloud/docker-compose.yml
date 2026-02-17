@@ -1,0 +1,29 @@
+version: "3.7"
+
+services:
+  server:
+    image: wastolord/plasma-m1132:v3
+    restart: on-failure
+    stop_grace_period: 1m
+    
+    # Privilegiado para acesso total ao USB (Scan e Print)
+    privileged: true
+    
+    volumes:
+      # Mapeamento do USB
+      - /dev/bus/usb:/dev/bus/usb
+      # Configuração do CUPS
+      - ${APP_DATA_DIR}/data/cups:/etc/cups
+      - ${APP_DATA_DIR}/data/log:/var/log/cups
+      # ONDE OS SCANS SERÃO SALVOS (Host : Container)
+      - /home/umbrel/umbrel/home/Photos/Scans:/scans
+
+    ports:
+      - "631:631"   # Porta nativa de impressão (IPP)
+      - "9101:9101" # Nova Interface Web (Scan/Upload)
+
+    deploy:
+      resources:
+        limits:
+          cpus: '0.80'  # Aumentei um pouco pois agora roda Node.js também
+          memory: 350M
