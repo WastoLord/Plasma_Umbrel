@@ -1,0 +1,8 @@
+version: '3.8'
+services:
+  bot-ranking:
+    build: .
+    container_name: bot_ranking_whatsapp
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data  # Guarda a sessão e a base de dados do ranking
